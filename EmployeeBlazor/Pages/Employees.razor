@@ -1,0 +1,110 @@
+﻿@page "/employees"
+@using EmployeeBlazor.Models
+@using EmployeeBlazor.Servcies
+@inject EmployeeService Service
+
+<h3>Employee CRUD (Blazor + API)</h3>
+
+<input placeholder="Enter name" @bind ="newEmployee.Name" />
+<button @onclick ="AddEmployee">Add</button>
+
+<hr />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (employees == null)
+        {
+            <tr><td colspan="3">Loading...</td></tr>
+        }
+        else
+        {
+            @foreach (var emp in employees)
+            {
+                <tr>
+                    <td>@emp.Id</td>
+
+                    <td>
+                        @if (editId == emp.Id)
+                        {
+                            <input @bind ="editName" />
+                        }
+                        else
+                        {
+                            @emp.Name
+                        }
+                    </td>
+
+                    <td>
+                        @if (editId == emp.Id)
+                        {
+                            <button @onclick ="() => SaveEdit(emp.Id)">Save</button>
+                            <button @onclick ="CancelEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <button @onclick ="() => Edit(emp.Id, emp.Name)">Edit</button>
+                            <button @onclick ="() => Delete(emp.Id)">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    List<Employee>
+    ? employees;
+    Employee newEmployee = new();
+    int editId = 0;
+    string editName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+    await Load();
+    }
+
+    async Task Load()
+    {
+    employees = await Service.GetEmployees();
+    }
+
+    async Task AddEmployee()
+    {
+    await Service.CreateEmployee(newEmployee);
+    newEmployee = new Employee();
+    await Load();
+    }
+
+    void Edit(int id, string name)
+    {
+    editId = id;
+    editName = name;
+    }
+
+    void CancelEdit()
+    {
+    editId = 0;
+    editName = "";
+    }
+
+    async Task SaveEdit(int id)
+    {
+    await Service.UpdateEmployee(new Employee { Id = id, Name = editName });
+    editId = 0;
+    await Load();
+    }
+
+    async Task Delete(int id)
+    {
+    await Service.DeleteEmployee(id);
+    await Load();
+    }
+}
