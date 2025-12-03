@@ -4,8 +4,12 @@
 @inject EmployeeService Service
 
 <h3>Employee CRUD (Blazor + API)</h3>
-
+<label>Name</label>
 <input placeholder="Enter name" @bind ="newEmployee.Name" />
+<label>Email</label>
+<input placeholder="Enter Email" @bind="newEmployee.Email" />
+<label>Address</label>
+<input placeholder="Enter Address" @bind="newEmployee.Address" />
 <button @onclick ="AddEmployee">Add</button>
 
 <hr />
@@ -15,6 +19,8 @@
         <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Email</th>
+            <th>Address</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -38,6 +44,30 @@
                         else
                         {
                             @emp.Name
+                            
+                        }
+                    </td>
+                    <td>
+                        @if (editId == emp.Id)
+                        {
+                            <input @bind="editEmail" />
+                        }
+                        else
+                        {
+                            @emp.Email
+
+                        }
+                    </td>
+                    <td>
+                        @if (editId == emp.Id)
+                        {
+                            <input @bind="editAddress" />
+                        }
+                        else
+                        {
+                         
+                            @emp.Address
+
                         }
                     </td>
 
@@ -49,7 +79,7 @@
                         }
                         else
                         {
-                            <button @onclick ="() => Edit(emp.Id, emp.Name)">Edit</button>
+                            <button @onclick ="() => Edit(emp.Id, emp.Name,emp.Email,emp.Address)">Edit</button>
                             <button @onclick ="() => Delete(emp.Id)">Delete</button>
                         }
                     </td>
@@ -65,39 +95,45 @@
     Employee newEmployee = new();
     int editId = 0;
     string editName = "";
+    string editEmail="";
+    string editAddress = "";
 
     protected override async Task OnInitializedAsync()
     {
-    await Load();
+        await Load();
     }
 
     async Task Load()
     {
-    employees = await Service.GetEmployees();
+        employees = await Service.GetEmployees();
     }
 
     async Task AddEmployee()
     {
-    await Service.CreateEmployee(newEmployee);
-    newEmployee = new Employee();
-    await Load();
+        await Service.CreateEmployee(newEmployee);
+        newEmployee = new Employee();
+        await Load();
     }
 
-    void Edit(int id, string name)
+    void Edit(int id, string name,string Email,string Address)
     {
-    editId = id;
-    editName = name;
+        editId = id;
+        editName = name;
+        editAddress = Address;
+        editEmail = Email;
     }
 
     void CancelEdit()
     {
-    editId = 0;
-    editName = "";
+        editId = 0;
+        editName = "";
+        editEmail = "";
+        editAddress = "";
     }
 
     async Task SaveEdit(int id)
     {
-    await Service.UpdateEmployee(new Employee { Id = id, Name = editName });
+    await Service.UpdateEmployee(new Employee { Id = id, Name = editName,Email=editEmail,Address=editAddress });
     editId = 0;
     await Load();
     }
